@@ -6,10 +6,10 @@ These two programs demonstrate how to use the Intel SGX build of the GMP library
 
 To build and run these demo applications, you'll need the following:
 
-* The GNU Multiple Precision Arithmetic Library for Intel Software Guard Extensions
+* The [GNU Multiple Precision Arithmetic Library for Intel Software Guard Extensions](https://github.com/intel/sgx-gmp)
   * both the Intel SGX and "stock" builds of this library are required
   * both builds can be produced from the above
-* The Intel SGX SDK
+* The [Intel SGX SDK](https://github.com/intel/linux-sgx)
 * Intel SGX capable hardware
 
 These applications have been tested on:
