@@ -26,7 +26,7 @@ Configure the distribution by running the `configure` script. You'll need to spe
   --with-trusted-gmpdir=PATH   the trusted libgmp directory (default: gmp directory)
 ```
 
-If you both builds of the library are installed to the same directory, you can just specify `--with-gmpdir=PATH`.
+If both builds of the library are installed to the same directory, you can just specify `--with-gmpdir=PATH`.
 
 To compile the applications, run `make`.
 

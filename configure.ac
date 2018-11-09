@@ -19,7 +19,7 @@ AC_ARG_WITH([gmpdir],
 	gmpdir=$withval
 )
 
-AC_ARG_WITH([tgmpdir],
+AC_ARG_WITH([trusted-gmpdir],
 	AC_HELP_STRING([--with-trusted-gmpdir=PATH], [the trusted libgmp directory (default: gmp directory)]),
 	tgmpdir=$withval,
 	tgmpdir=$gmpdir
