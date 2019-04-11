@@ -64,11 +64,13 @@ int main (int argc, char *argv[])
 	mpf_set_z(fa, a);
 	mpf_set_z(fb, b);
 
+#ifndef SGX_HW_SIM
 	support= get_sgx_support();
 	if ( ! SGX_OK(support) ) {
 		sgx_support_perror(support);
 		return 1;
 	}
+#endif
 
 	status= sgx_create_enclave_search(ENCLAVE_NAME, SGX_DEBUG_FLAG,
 		 &token, &updated, &eid, 0);
