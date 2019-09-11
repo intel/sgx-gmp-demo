@@ -121,7 +121,7 @@ int main (int argc, char *argv[])
 		return 1;
 	}
 	if ( len == 0 ) {
-		fprintf(stderr, "e_pi: no result\n", status);
+		fprintf(stderr, "e_pi: no result\n");
 		return 1;
 	}
 
