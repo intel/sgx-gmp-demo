@@ -70,7 +70,7 @@ AM_CXXFLAGS += -fno-builtin
 ## Additional files to remove with 'make clean'. This list needs
 ## to include your edger8r genreated files.
 
-CLEANFILES+= EnclaveGmpTest_t.c EnclaveGmpTest_t.h 
+CLEANFILES+= EnclaveGmpTest_t.c EnclaveGmpTest_t.h serialize.c serialize.h
 
 
 ## Supply additional flags to edger8r here.
@@ -83,8 +83,16 @@ CLEANFILES+= EnclaveGmpTest_t.c EnclaveGmpTest_t.h
 ## target name (i.e., $(ENCLAVE)_SOURCES will not work).
 
 EnclaveGmpTest_SOURCES = EnclaveGmpTest_t.c EnclaveGmpTest_t.h \
-	EnclaveGmpTest.c $(ENCLAVE_KEY) $(ENCLAVE_CONFIG)
+	EnclaveGmpTest.c $(ENCLAVE_KEY) $(ENCLAVE_CONFIG) serialize.c
+BUILT_SOURCES = serialize.c serialize.h
 
+## Need to built these separately for the enclave.
+
+serialize.c: ../serialize.c
+	ln -s ../serialize.c
+
+serialize.h: ../serialize.h
+	ln -s ../serialize.h
 
 ## Add additional linker flags to AM_LDFLAGS here. Don't put 
 ## libraries flags here (see below).
@@ -92,7 +100,7 @@ EnclaveGmpTest_SOURCES = EnclaveGmpTest_t.c EnclaveGmpTest_t.h \
 ## Be sure to use += to add to, and not replace, the default 
 ## AM_LDFLAGS.
 
-AM_LDFLAGS += $(TGMP_LDFLAGS)
+AM_LDFLAGS += $(TGMP_LDFLAGS) 
 
 
 ## This line is REQUIRED. It can't be generically defined for 
@@ -110,7 +118,7 @@ EnclaveGmpTest_LDADD = @SGX_ENCLAVE_LDADD@
 ## --startgroup and --endgroup flags. (This would be where you'd add
 ## SGXSSL libraries, and your trusted c++ library
 
-SGX_EXTRA_TLIBS=-lsgx_tgmp
+SGX_EXTRA_TLIBS=-lsgx_tgmp 
 
 
 ## This line is OPTIONAL, and comes with a WARNING.

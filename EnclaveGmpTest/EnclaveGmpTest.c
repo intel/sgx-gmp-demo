@@ -35,6 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sgx_tgmp.h>
 #include <sgx_trts.h>
 #include <math.h>
+#include <string.h>
+#include "serialize.h"
 
 void *(*gmp_realloc_func)(void *, size_t, size_t);
 void *(*oc_realloc_func)(void *, size_t, size_t);
@@ -46,10 +48,19 @@ void free_function(void *, size_t);
 
 void e_calc_pi (mpf_t *pi, uint64_t digits);
 
+/*
+ * Use a global to store our results. A real program would need something
+ * more sophisticated than this.
+ */
+
+char *result;
+
 void tgmp_init()
 {
 	oc_realloc_func= &reallocate_function;
 	oc_free_func= &free_function;
+
+	result= NULL;
 
 	mp_get_memory_functions(NULL, &gmp_realloc_func, &gmp_free_func);
 	mp_set_memory_functions(NULL, oc_realloc_func, oc_free_func);
@@ -89,7 +100,32 @@ void *reallocate_function (void *ptr, size_t osize, size_t nsize)
 	return (void *) nptr;
 }
 
-void e_mpz_add(mpz_t *c_un, mpz_t *a_un, mpz_t *b_un)
+int e_get_result(char *str, size_t len)
+{
+	/*
+	 * Marshal our result out of the enclave. Make sure the destination
+	 * buffer is completely outside the enclave, and that what we are
+	 * copying is completely inside the enclave.
+	 */
+
+	if ( result == NULL || str == NULL || len == 0 ) return 0;
+
+	if ( ! sgx_is_within_enclave(result, len) ) return 0;
+
+	if ( sgx_is_outside_enclave(str, len+1) ) { /* Include terminating NULL */
+		strncpy(str, result, len); 
+		str[len]= '\0';
+
+		gmp_free_func(result, NULL);
+		result= NULL;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+size_t e_mpz_add(char *str_a, char *str_b)
 {
 	mpz_t a, b, c;
 
@@ -101,70 +137,124 @@ void e_mpz_add(mpz_t *c_un, mpz_t *a_un, mpz_t *b_un)
 	 * it's best to develop good coding habits.
 	 */
 
+	/* Clear the last, serialized result */
+
+	if ( result != NULL ) {
+		gmp_free_func(result, NULL);
+		result= NULL;
+	}
+
 	mpz_inits(a, b, c, NULL);
 
-	mpz_set(a, *a_un);
-	mpz_set(b, *b_un);
+	/* Deserialize */
+
+	if ( mpz_deserialize(&a, str_a) == -1 ) return 0;
+	if ( mpz_deserialize(&b, str_b) == -1 ) return 0;
 
 	mpz_add(c, a, b);
 
-	/* Marshal our result out of the enclave */
+	/* Serialize the result */
 
-	mpz_set(*c_un, c);
+	result= mpz_serialize(c);
+	if ( result == NULL ) return 0;
+
+	return strlen(result);
 }
 
-void e_mpz_mul(mpz_t *c_un, mpz_t *a_un, mpz_t *b_un)
+size_t e_mpz_mul(char *str_a, char *str_b)
 {
 	mpz_t a, b, c;
 
 	/* Marshal untrusted values into the enclave. */
 
+	/* Clear the last, serialized result */
+
+	if ( result != NULL ) {
+		gmp_free_func(result, NULL);
+		result= NULL;
+	}
+
 	mpz_inits(a, b, c, NULL);
 
-	mpz_set(a, *a_un);
-	mpz_set(b, *b_un);
+	/* Deserialize */
+
+	if ( mpz_deserialize(&a, str_a) == -1 ) return 0;
+	if ( mpz_deserialize(&b, str_b) == -1 ) return 0;
 
 	mpz_mul(c, a, b);
 
-	/* Marshal our result out of the enclave. */
+	/* Serialize the result */
 
-	mpz_set(*c_un, c);
+	result= mpz_serialize(c);
+	if ( result == NULL ) return 0;
+
+	return strlen(result);
 }
 
-void e_mpz_div(mpz_t *c_un, mpz_t *a_un, mpz_t *b_un)
+size_t e_mpz_div(char *str_a, char *str_b)
 {
 	mpz_t a, b, c;
 
 	/* Marshal untrusted values into the enclave */
 
+	/* Clear the last, serialized result */
+
+	if ( result != NULL ) {
+		gmp_free_func(result, NULL);
+		result= NULL;
+	}
+
 	mpz_inits(a, b, c, NULL);
 
-	mpz_set(a, *a_un);
-	mpz_set(b, *b_un);
+	/* Deserialize */
+
+	if ( mpz_deserialize(&a, str_a) == -1 ) return 0;
+	if ( mpz_deserialize(&b, str_b) == -1 ) return 0;
 
 	mpz_div(c, a, b);
 
-	/* Marshal our result out of the enclave */
+	/* Serialize the result */
 
-	mpz_set(*c_un, c);
+	result= mpz_serialize(c);
+	if ( result == NULL ) return 0;
+
+	return strlen(result);
 }
 
-void e_mpf_div(mpf_t *c_un, mpf_t *a_un, mpf_t *b_un)
+size_t e_mpf_div(char *str_a, char *str_b, int digits)
 {
-	mpf_t a, b, c;
+	mpz_t a, b;
+	mpf_t fa, fb, fc;
 
 	/* Marshal untrusted values into the enclave */
 
-	mpf_inits(a, b, c, NULL);
+	/* Clear the last, serialized result */
 
-	mpf_set(a, *a_un);
-	mpf_set(b, *b_un);
+	if ( result != NULL ) {
+		gmp_free_func(result, NULL);
+		result= NULL;
+	}
 
-	mpf_div(c, a, b);
+	mpz_inits(a, b, NULL);
+	mpf_inits(fa, fb, fc, NULL);
 
-	/* Marshal our result out of the enclave */
+	/* Deserialize */
 
-	mpf_set(*c_un, c);
+	if ( mpz_deserialize(&a, str_a) == -1 ) return 0;
+	if ( mpz_deserialize(&b, str_b) == -1 ) return 0;
+
+	mpf_set_z(fa, a);
+	mpf_set_z(fb, b);
+
+	mpf_div(fc, fa, fb);
+
+
+	/* Serialize the result */
+
+	result= mpf_serialize(fc, digits);
+	if ( result == NULL ) return 0;
+
+	return strlen(result);
 }
 
 /* Use the Chudnovsky equation to rapidly estimate pi */
