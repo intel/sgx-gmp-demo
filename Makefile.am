@@ -91,7 +91,6 @@ EnclaveGmpTest.signed.so: EnclaveGmpTest/EnclaveGmpTest.signed.so
 ## Use the variables, not the actual library names to ensure these
 ## targets work on simulation builds.
 
-stest_LDADD=-lgmp 
 sgxgmpmath_LDADD=-l$(SGX_URTS_LIB) -lgmp -ldl -l:libsgx_capable.a -lpthread 
 sgxgmppi_LDADD=-l$(SGX_URTS_LIB) -lgmp -ldl -l:libsgx_capable.a -lpthread 
 
