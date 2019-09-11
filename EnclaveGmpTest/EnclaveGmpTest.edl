@@ -26,7 +26,7 @@ enclave {
 			[user_check] char *str_c, size_t len
 		);
 
-		public void e_pi ([user_check] mpf_t *pi, uint64_t digits);
+		public size_t e_pi (uint64_t digits);
 	};
 
 
