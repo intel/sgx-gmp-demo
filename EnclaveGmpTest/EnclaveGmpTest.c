@@ -264,7 +264,7 @@ size_t e_mpf_div(char *str_a, char *str_b, int digits)
 mpz_t c3, c4, c5;
 int pi_init= 0;
 
-void e_pi (mpf_t *pi_un, uint64_t digits)
+size_t e_pi (uint64_t digits)
 {
 	mpf_t pi;
 
@@ -275,12 +275,16 @@ void e_pi (mpf_t *pi_un, uint64_t digits)
 
 	mpf_init(pi);
 
-	e_calc_pi(&pi, digits);
+	e_calc_pi(&pi, digits+1);
 
 	/* Marshal our result to untrusted memory */
 
-	mpf_set_prec(*pi_un, mpf_get_prec(pi));
-	mpf_set(*pi_un, pi);
+	mpf_set_prec(pi, mpf_get_prec(pi));
+
+	result= mpf_serialize(pi, digits+1);
+	if ( result == NULL ) return 0;
+
+	return strlen(result);
 }
 
 void e_calc_pi (mpf_t *pi, uint64_t digits)

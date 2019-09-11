@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
 	mpf_set_ui(f, 0);
 	gmp_printf("cleared: %.12Ff\n", f);
 
-	if ( mpf_deserialize(&f, s) == -1 ) {
+	if ( mpf_deserialize(&f, s, 9) == -1 ) {
 		fprintf(stderr, "mpz_deserialize: bad serial format\n");
 		return 1;
 	}

@@ -5,9 +5,10 @@
 #endif
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "serialize.h"
 
-#define S_BASE 10
+#define S_BASE 62
 
 static void *(*gmp_alloc_func)(size_t)= NULL;
 static void (*gmp_free_func)(void *, size_t)= NULL;
@@ -75,7 +76,11 @@ int mpz_deserialize(mpz_t *val, char *s)
 	return mpz_set_str(*val, s, S_BASE);
 }
 
-int mpf_deserialize(mpf_t *val, char *s)
+int mpf_deserialize(mpf_t *val, char *s, int digits)
 {
+	static double bits= log2(10);
+
+	mpf_set_prec(*val, (digits*bits)+1);
+
 	return mpf_set_str(*val, s, S_BASE);
 }

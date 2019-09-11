@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "sgx_detect.h"
 #include "EnclaveGmpTest_u.h"
 #include "create_enclave.h"
+#include "serialize.h"
 
 #define ENCLAVE_NAME "EnclaveGmpTest.signed.so"
 
@@ -57,8 +58,10 @@ int main (int argc, char *argv[])
 	int updated= 0;
 	unsigned long support;
 	mpf_t pi;
+	char *pi_str;
 	uint64_t digits;
-	int opt;
+	int opt, rv;
+	size_t len;
 
 	while ( (opt= getopt(argc, argv, "h")) != -1 ) {
 		switch (opt) {
@@ -112,9 +115,30 @@ int main (int argc, char *argv[])
 
 	mpf_init(pi);
 
-	status= e_pi(eid, &pi, digits);
+	status= e_pi(eid, &len, digits);
 	if ( status != SGX_SUCCESS ) {
 		fprintf(stderr, "ECALL e_pi: 0x%04x\n", status);
+		return 1;
+	}
+	if ( len == 0 ) {
+		fprintf(stderr, "e_pi: no result\n", status);
+		return 1;
+	}
+
+	pi_str= malloc(len+1);
+
+	status= e_get_result(eid, &rv, pi_str, len);
+	if ( status != SGX_SUCCESS ) {
+		fprintf(stderr, "ECALL e_get_result: 0x%04x\n", status);
+		return 1;
+	}
+	if ( rv == 0 ) {
+		fprintf(stderr, "e_get_result: bad parameters");
+		return 1;
+	}
+
+	if ( mpf_deserialize(&pi, pi_str, digits) == -1 ) {
+		fprintf(stderr, "mpf_deserialize: bad result string");
 		return 1;
 	}
 

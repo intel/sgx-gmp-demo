@@ -244,7 +244,7 @@ int main (int argc, char *argv[])
 		return 1;
 	}
 
-	if ( mpf_deserialize(&fc, str_fc) == -1 ) {
+	if ( mpf_deserialize(&fc, str_fc, digits) == -1 ) {
 		fprintf(stderr, "mpf_deserialize: bad float string\n");
 		return 1;
 	}
