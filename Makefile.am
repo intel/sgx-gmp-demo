@@ -55,7 +55,7 @@ CLEANFILES = $(COMMON_ENCLAVE_SRC) EnclaveGmpTest.edl \
 
 ## The build target
 
-bin_PROGRAMS = sgxgmpmath sgxgmppi stest
+bin_PROGRAMS = sgxgmpmath sgxgmppi 
 
 
 ## You can't use $(wildcard ...) with automake so all source files 
@@ -64,8 +64,6 @@ bin_PROGRAMS = sgxgmpmath sgxgmppi stest
 COMMON_SRC = sgx_stub.c sgx_detect_linux.c create_enclave.c oc_alloc.c \
 	serialize.c
 COMMON_ENCLAVE_SRC = EnclaveGmpTest_u.c EnclaveGmpTest_u.h 
-
-stest_SOURCES = stest.c serialize.c
 
 sgxgmpmath_SOURCES = sgxgmpmath.c $(COMMON_SRC)
 nodist_sgxgmpmath_SOURCES = $(COMMON_ENCLAVE_SRC)
