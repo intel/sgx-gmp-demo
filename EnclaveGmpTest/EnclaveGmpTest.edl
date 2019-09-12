@@ -29,13 +29,5 @@ enclave {
 		public size_t e_pi (uint64_t digits);
 	};
 
-
-	untrusted {
-		include "gmp.h"
-
-		uint64_t oc_realloc([user_check] void *optr, size_t osz, size_t nsz);
-
-		void oc_free([user_check] void *optr, size_t sz);
-	};
 };
 

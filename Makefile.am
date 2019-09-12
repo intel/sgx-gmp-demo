@@ -61,7 +61,7 @@ bin_PROGRAMS = sgxgmpmath sgxgmppi
 ## You can't use $(wildcard ...) with automake so all source files 
 ## have to be explicitly listed.
 
-COMMON_SRC = sgx_stub.c sgx_detect_linux.c create_enclave.c oc_alloc.c \
+COMMON_SRC = sgx_stub.c sgx_detect_linux.c create_enclave.c \
 	serialize.c
 COMMON_ENCLAVE_SRC = EnclaveGmpTest_u.c EnclaveGmpTest_u.h 
 

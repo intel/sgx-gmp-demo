@@ -39,9 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "serialize.h"
 
 void *(*gmp_realloc_func)(void *, size_t, size_t);
-void *(*oc_realloc_func)(void *, size_t, size_t);
 void (*gmp_free_func)(void *, size_t);
-void (*oc_free_func)(void *, size_t);
 
 void *reallocate_function(void *, size_t, size_t);
 void free_function(void *, size_t);
@@ -57,47 +55,23 @@ char *result;
 
 void tgmp_init()
 {
-	oc_realloc_func= &reallocate_function;
-	oc_free_func= &free_function;
-
 	result= NULL;
 
 	mp_get_memory_functions(NULL, &gmp_realloc_func, &gmp_free_func);
-	mp_set_memory_functions(NULL, oc_realloc_func, oc_free_func);
+	mp_set_memory_functions(NULL, &reallocate_function, &free_function);
 }
 
 void free_function (void *ptr, size_t sz)
 {
 	if ( sgx_is_within_enclave(ptr, sz) ) gmp_free_func(ptr, sz);
-	else {
-		sgx_status_t status;
-
-		status= oc_free(ptr, sz);
-		if ( status != SGX_SUCCESS ) abort();
-	}
+	else abort();
 }
 
 void *reallocate_function (void *ptr, size_t osize, size_t nsize)
 {
-	uint64_t nptr;
-	sgx_status_t status;
+	if ( ! sgx_is_within_enclave(ptr, osize) ) abort();
 
-	if ( sgx_is_within_enclave(ptr, osize) ) {
-		return gmp_realloc_func(ptr, osize, nsize);
-	}
-
-	status= oc_realloc(&nptr, ptr, osize, nsize);
-	if ( status != SGX_SUCCESS ) abort();
-
-	/*
-	 * If the entire range of allocated memory is not outside the enclave
-	 * then something truly terrible has happened. In theory, we could 
-	 * free() and try again, but would you trust the OS at this point?
-	 */
-
-	if ( ! sgx_is_outside_enclave((void *) ptr, nsize) ) abort();
-
-	return (void *) nptr;
+	return gmp_realloc_func(ptr, osize, nsize);
 }
 
 int e_get_result(char *str, size_t len)

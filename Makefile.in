@@ -103,7 +103,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = sgx_stub.$(OBJEXT) sgx_detect_linux.$(OBJEXT) \
-	create_enclave.$(OBJEXT) oc_alloc.$(OBJEXT)
+	create_enclave.$(OBJEXT) serialize.$(OBJEXT)
 am_sgxgmpmath_OBJECTS = sgxgmpmath.$(OBJEXT) $(am__objects_1)
 am__objects_2 = EnclaveGmpTest_u.$(OBJEXT)
 nodist_sgxgmpmath_OBJECTS = $(am__objects_2)
@@ -354,17 +354,19 @@ SGXSSL_BINDIR = @SGXSSL_BINDIR@
 @SGX_ENABLED_FALSE@AM_CPPFLAGS = -fno-builtin-memset $(GMP_CPPFLAGS)
 @SGX_ENABLED_TRUE@AM_CPPFLAGS = -I$(SGXSDK_INCDIR) -fno-builtin-memset \
 @SGX_ENABLED_TRUE@	$(GMP_CPPFLAGS)
-@SGX_ENABLED_FALSE@AM_LDFLAGS = $(GMP_LDFLAGS)
-@SGX_ENABLED_TRUE@AM_LDFLAGS = -L$(SGXSDK_LIBDIR) $(GMP_LDFLAGS)
+@SGX_ENABLED_FALSE@AM_LDFLAGS = $(GMP_LDFLAGS) -L.
+@SGX_ENABLED_TRUE@AM_LDFLAGS = -L$(SGXSDK_LIBDIR) $(GMP_LDFLAGS) -L.
 SUBDIRS = EnclaveGmpTest
 CLEANFILES = $(COMMON_ENCLAVE_SRC) EnclaveGmpTest.edl \
 	EnclaveGmpTest.signed.so
 
-COMMON_SRC = sgx_stub.c sgx_detect_linux.c create_enclave.c oc_alloc.c
-COMMON_ENCLAVE_SRC = EnclaveGmpTest_u.c EnclaveGmpTest_u.h
+COMMON_SRC = sgx_stub.c sgx_detect_linux.c create_enclave.c \
+	serialize.c
+
+COMMON_ENCLAVE_SRC = EnclaveGmpTest_u.c EnclaveGmpTest_u.h 
 sgxgmpmath_SOURCES = sgxgmpmath.c $(COMMON_SRC)
 nodist_sgxgmpmath_SOURCES = $(COMMON_ENCLAVE_SRC)
-EXTRA_sgxgmpmath_DEPENDENCIES = EnclaveGmpTest.signed.so
+EXTRA_sgxgmpmath_DEPENDENCIES = EnclaveGmpTest.signed.so 
 sgxgmppi_SOURCES = sgxgmppi.c $(COMMON_SRC)
 nodist_sgxgmppi_SOURCES = $(COMMON_ENCLAVE_SRC)
 EXTRA_sgxgmppi_DEPENDENCIES = EnclaveGmpTest.signed.so
@@ -469,7 +471,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EnclaveGmpTest_u.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/create_enclave.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oc_alloc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serialize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sgx_detect_linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sgx_stub.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sgxgmpmath.Po@am__quote@

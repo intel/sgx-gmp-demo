@@ -107,7 +107,8 @@ am__installdirs = "$(DESTDIR)$(libexecdir)"
 PROGRAMS = $(libexec_PROGRAMS)
 am__objects_1 =
 am_EnclaveGmpTest_OBJECTS = EnclaveGmpTest_t.$(OBJEXT) \
-	EnclaveGmpTest.$(OBJEXT) $(am__objects_1) $(am__objects_1)
+	EnclaveGmpTest.$(OBJEXT) $(am__objects_1) $(am__objects_1) \
+	serialize.$(OBJEXT)
 EnclaveGmpTest_OBJECTS = $(am_EnclaveGmpTest_OBJECTS)
 EnclaveGmpTest_DEPENDENCIES =
 @ENCLAVE_RELEASE_SIGN_FALSE@nodist_signed_enclave_debug_OBJECTS =  \
@@ -302,18 +303,20 @@ AM_CPPFLAGS = @SGX_ENCLAVE_CPPFLAGS@ $(TGMP_CPPFLAGS)
 AM_CXXFLAGS = @SGX_ENCLAVE_CXXFLAGS@ @SGX_ENCLAVE_CFLAGS@ -fno-builtin
 AM_LDFLAGS = @SGX_ENCLAVE_LDFLAGS@ $(TGMP_LDFLAGS)
 CLEANFILES = $(ENCLAVE).signed.so EnclaveGmpTest_t.c \
-	EnclaveGmpTest_t.h
+	EnclaveGmpTest_t.h serialize.c serialize.h
 @ENCLAVE_RELEASE_SIGN_TRUE@nodist_signed_enclave_rel_SOURCES = signed_enclave_rel.c
 @ENCLAVE_RELEASE_SIGN_FALSE@nodist_signed_enclave_debug_SOURCES = signed_enclave_debug.c
 ENCLAVE = EnclaveGmpTest
 ENCLAVE_CONFIG = $(ENCLAVE).config.xml
 ENCLAVE_KEY = $(ENCLAVE)_private.pem
 EnclaveGmpTest_SOURCES = EnclaveGmpTest_t.c EnclaveGmpTest_t.h \
-	EnclaveGmpTest.c $(ENCLAVE_KEY) $(ENCLAVE_CONFIG)
+	EnclaveGmpTest.c $(ENCLAVE_KEY) $(ENCLAVE_CONFIG) serialize.c
 
+BUILT_SOURCES = serialize.c serialize.h
 EnclaveGmpTest_LDADD = @SGX_ENCLAVE_LDADD@
-SGX_EXTRA_TLIBS = -lsgx_tgmp
-all: all-am
+SGX_EXTRA_TLIBS = -lsgx_tgmp 
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .o .obj
@@ -402,6 +405,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EnclaveGmpTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EnclaveGmpTest_t.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serialize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signed_enclave_debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signed_enclave_rel.Po@am__quote@
 
@@ -502,13 +506,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
 	for dir in "$(DESTDIR)$(libexecdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -539,6 +545,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libexecPROGRAMS mostlyclean-am
@@ -608,7 +615,7 @@ ps-am:
 
 uninstall-am: uninstall-libexecPROGRAMS
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
 	clean-libexecPROGRAMS cscopelist-am ctags ctags-am distclean \
@@ -671,6 +678,12 @@ $(ENCLAVE_CONFIG):
 	@echo " <MiscMask>0xFFFFFFFF</MiscMask>">>$(ENCLAVE).config.xml
 	@echo " </EnclaveConfiguration>">>$(ENCLAVE).config.xml
 	@echo ""
+
+serialize.c: ../serialize.c
+	ln -s ../serialize.c
+
+serialize.h: ../serialize.h
+	ln -s ../serialize.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
