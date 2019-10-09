@@ -258,6 +258,14 @@ size_t e_pi (uint64_t digits)
 {
 	mpf_t pi;
 
+	/* Clear the last, serialized result */
+
+	if ( result != NULL ) {
+		gmp_free_func(result, NULL);
+		result= NULL;
+		len_result= 0;
+	}
+
 	/*
 	 * Perform our operations on a variable that's located in the enclave,
 	 * then marshal the final value out of the enclave.
