@@ -52,10 +52,12 @@ void e_calc_pi (mpf_t *pi, uint64_t digits);
  */
 
 char *result;
+size_t len_result= 0;
 
 void tgmp_init()
 {
 	result= NULL;
+	len_result= 0;
 
 	mp_get_memory_functions(NULL, &gmp_realloc_func, &gmp_free_func);
 	mp_set_memory_functions(NULL, &reallocate_function, &free_function);
@@ -76,6 +78,11 @@ void *reallocate_function (void *ptr, size_t osize, size_t nsize)
 
 int e_get_result(char *str, size_t len)
 {
+	/* Make sure the application doesn't ask for more bytes than 
+	 * were allocated for the result. */
+
+	if ( len > len_result ) return 0;
+
 	/*
 	 * Marshal our result out of the enclave. Make sure the destination
 	 * buffer is completely outside the enclave, and that what we are
@@ -92,6 +99,7 @@ int e_get_result(char *str, size_t len)
 
 		gmp_free_func(result, NULL);
 		result= NULL;
+		len_result= 0;
 
 		return 1;
 	}
@@ -116,6 +124,7 @@ size_t e_mpz_add(char *str_a, char *str_b)
 	if ( result != NULL ) {
 		gmp_free_func(result, NULL);
 		result= NULL;
+		len_result= 0;
 	}
 
 	mpz_inits(a, b, c, NULL);
@@ -132,7 +141,8 @@ size_t e_mpz_add(char *str_a, char *str_b)
 	result= mpz_serialize(c);
 	if ( result == NULL ) return 0;
 
-	return strlen(result);
+	len_result= strlen(result);
+	return len_result;
 }
 
 size_t e_mpz_mul(char *str_a, char *str_b)
@@ -146,6 +156,7 @@ size_t e_mpz_mul(char *str_a, char *str_b)
 	if ( result != NULL ) {
 		gmp_free_func(result, NULL);
 		result= NULL;
+		len_result= 0;
 	}
 
 	mpz_inits(a, b, c, NULL);
@@ -162,7 +173,8 @@ size_t e_mpz_mul(char *str_a, char *str_b)
 	result= mpz_serialize(c);
 	if ( result == NULL ) return 0;
 
-	return strlen(result);
+	len_result= strlen(result);
+	return len_result;
 }
 
 size_t e_mpz_div(char *str_a, char *str_b)
@@ -176,6 +188,7 @@ size_t e_mpz_div(char *str_a, char *str_b)
 	if ( result != NULL ) {
 		gmp_free_func(result, NULL);
 		result= NULL;
+		len_result= 0;
 	}
 
 	mpz_inits(a, b, c, NULL);
@@ -192,7 +205,8 @@ size_t e_mpz_div(char *str_a, char *str_b)
 	result= mpz_serialize(c);
 	if ( result == NULL ) return 0;
 
-	return strlen(result);
+	len_result= strlen(result);
+	return len_result;
 }
 
 size_t e_mpf_div(char *str_a, char *str_b, int digits)
@@ -207,6 +221,7 @@ size_t e_mpf_div(char *str_a, char *str_b, int digits)
 	if ( result != NULL ) {
 		gmp_free_func(result, NULL);
 		result= NULL;
+		len_result= 0;
 	}
 
 	mpz_inits(a, b, NULL);
@@ -228,7 +243,8 @@ size_t e_mpf_div(char *str_a, char *str_b, int digits)
 	result= mpf_serialize(fc, digits);
 	if ( result == NULL ) return 0;
 
-	return strlen(result);
+	len_result= strlen(result);
+	return len_result;
 }
 
 /* Use the Chudnovsky equation to rapidly estimate pi */
@@ -258,7 +274,8 @@ size_t e_pi (uint64_t digits)
 	result= mpf_serialize(pi, digits+1);
 	if ( result == NULL ) return 0;
 
-	return strlen(result);
+	len_result= strlen(result);
+	return len_result;
 }
 
 void e_calc_pi (mpf_t *pi, uint64_t digits)
