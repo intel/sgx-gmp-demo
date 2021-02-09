@@ -119,6 +119,8 @@ size_t e_mpz_add(char *str_a, char *str_b)
 	 * it's best to develop good coding habits.
 	 */
 
+	if ( str_a == NULL || str_b == NULL ) return 0;
+
 	/* Clear the last, serialized result */
 
 	if ( result != NULL ) {
@@ -150,6 +152,8 @@ size_t e_mpz_mul(char *str_a, char *str_b)
 	mpz_t a, b, c;
 
 	/* Marshal untrusted values into the enclave. */
+
+	if ( str_a == NULL || str_b == NULL ) return 0;
 
 	/* Clear the last, serialized result */
 
@@ -183,6 +187,8 @@ size_t e_mpz_div(char *str_a, char *str_b)
 
 	/* Marshal untrusted values into the enclave */
 
+	if ( str_a == NULL || str_b == NULL ) return 0;
+
 	/* Clear the last, serialized result */
 
 	if ( result != NULL ) {
@@ -215,6 +221,8 @@ size_t e_mpf_div(char *str_a, char *str_b, int digits)
 	mpf_t fa, fb, fc;
 
 	/* Marshal untrusted values into the enclave */
+
+	if ( str_a == NULL || str_b == NULL ) return 0;
 
 	/* Clear the last, serialized result */
 
