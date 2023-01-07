@@ -1,3 +1,14 @@
+DISCONTINUATION OF PROJECT
+
+This project will no longer be maintained by Intel.
+
+Intel has ceased development and contributions including, but not limited to, maintenance, bug fixes, new releases, or updates, to this project.  
+
+Intel no longer accepts patches to this project.
+
+If you have an ongoing need to use this project, are interested in independently developing it, or would like to maintain patches for the open source software community, please create your own fork of this project.  
+
+Contact: webadmin@linux.intel.com
 # Demo Programs for the GNU\* Multiple Precision Arithmetic Library\* for Intel&reg; Software Guard Extensions
 
 These two programs demonstrate how to use the Intel SGX build of the GMP library. For more information about this project, see the accompanying article "[Building the GNU\* Multiple Precision\* Arithmetic Library for Intel® Software Guard Extensions](https://software.intel.com/en-us/articles/building-the-gnu-multiple-precision-library-for-intel-software-guard-extensions)".
